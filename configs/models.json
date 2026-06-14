@@ -51,7 +51,7 @@
   "stable_video_diffusion_xt": {
     "type": "image_to_video",
     "adapter": "SVDAdapter",
-    "implemented": false,
+    "implemented": true,
     "min_vram_gb": 8,
     "supports_i2v": true,
     "supports_negative_prompt": false,
@@ -60,7 +60,7 @@
     "min_frames": 14,
     "max_frames": 25,
     "frame_multiple": 1,
-    "notes": "NOT IMPLEMENTED. Stable Video Diffusion XT. Phase 2 fallback."
+    "notes": "Stable Video Diffusion XT via diffusers. Real AI generator."
   },
   "framepack_low_vram": {
     "type": "image_to_video",

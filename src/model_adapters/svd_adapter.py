@@ -1,33 +1,11 @@
 """
 MotionForge - model_adapters/svd_adapter.py
-Placeholder adapter for Stable Video Diffusion XT.
-NOT IMPLEMENTED — returns False from is_available() so the pipeline skips it cleanly.
-
-Integration guide (Phase 2):
-  Model:    stabilityai/stable-video-diffusion-img2vid-xt
-  Library:  diffusers >= 0.27
-  VRAM:     ~8 GB fp16
-  Frames:   14 or 25 only
-  Max res:  1024x576
-
-  Quick start:
-    from diffusers import StableVideoDiffusionPipeline
-    pipe = StableVideoDiffusionPipeline.from_pretrained(
-        "stabilityai/stable-video-diffusion-img2vid-xt",
-        torch_dtype=torch.float16, variant="fp16",
-    )
-    pipe.enable_model_cpu_offload()
-    frames = pipe(image, num_inference_steps=25, motion_bucket_id=127).frames[0]
-
-  Once implemented:
-    1. Set IMPLEMENTED = True
-    2. Replace is_available() with real checks
-    3. Implement load(), generate(), unload()
-    4. Update configs/models.json notes field
+Adapter for Stable Video Diffusion XT using Hugging Face Diffusers.
 """
 
 from __future__ import annotations
 
+import time
 from pathlib import Path
 from typing import Any
 
@@ -39,24 +17,127 @@ log = get_logger("motionforge.adapters.svd")
 
 
 class SVDAdapter(BaseAdapter):
-    """Stable Video Diffusion XT adapter — NOT YET IMPLEMENTED."""
+    """Stable Video Diffusion XT adapter using diffusers."""
 
     name = "stable_video_diffusion_xt"
-    IMPLEMENTED = False   # Set True only when generate() is fully working
+    IMPLEMENTED = True
+
+    def __init__(self) -> None:
+        self.pipe = None
 
     def is_available(self) -> bool:
-        # Always return False until fully implemented
-        return False
+        try:
+            import torch  # noqa: F401
+            import diffusers  # noqa: F401
+            return torch.cuda.is_available()
+        except ImportError:
+            return False
 
     def load(self) -> None:
-        raise NotImplementedError(
-            "SVDAdapter is not implemented. "
-            "See module docstring for integration instructions."
+        if self.pipe is not None:
+            return
+
+        import torch
+        from diffusers import StableVideoDiffusionPipeline
+
+        log.info("Loading SVD XT weights (stabilityai/stable-video-diffusion-img2vid-xt)...")
+        self.pipe = StableVideoDiffusionPipeline.from_pretrained(
+            "stabilityai/stable-video-diffusion-img2vid-xt",
+            torch_dtype=torch.float16,
+            variant="fp16"
         )
+        self.pipe.enable_model_cpu_offload()
+        log.info("SVD XT loaded and offloaded to CPU.")
 
     def generate(self, scene: dict[str, Any], output_path: Path) -> GenerationResult:
-        raise NotImplementedError("SVDAdapter.generate() not yet implemented.")
+        if self.pipe is None:
+            return self._fail(self.name, "Pipeline not loaded. Call load() first.")
+
+        import torch
+        from PIL import Image
+        import numpy as np
+        from diffusers.utils import export_to_video
+
+        t_start = time.monotonic()
+
+        image_path = Path(scene.get("input_image", ""))
+        if not image_path.exists():
+            return self._fail(self.name, f"Image not found: {image_path}")
+
+        # Ensure dimensions are multiples of 64
+        width, height = self._resolution_from_scene(scene)
+        width = (width // 64) * 64
+        height = (height // 64) * 64
+        
+        # SVD-XT is optimized for 1024x576 or 576x1024
+        # We will bound it to a reasonable maximum if it's too large to fit in VRAM
+        if width * height > 1024 * 576:
+            log.warning("Requested resolution %dx%d is very large for SVD. Clamping to max ~1024x576 area.", width, height)
+            width, height = 1024, 576
+
+        try:
+            img = Image.open(image_path).convert("RGB")
+            img = img.resize((width, height), Image.LANCZOS)
+        except Exception as exc:  # noqa: BLE001
+            return self._fail(self.name, f"Failed to open/resize image: {exc}")
+
+        fps = int(scene.get("fps", 16))
+        seed = scene.get("seed")
+        
+        # In SVD, motion_bucket_id acts as motion_strength (1-255). Default 127.
+        motion_bucket_id = int(scene.get("motion_bucket_id", 127))
+        # SVD XT generates exactly 25 frames
+        frames_out = 25 
+        
+        if seed is not None:
+            generator = torch.manual_seed(seed)
+        else:
+            seed = np.random.randint(0, 2**31)
+            generator = torch.manual_seed(seed)
+
+        log.info("SVD generating: %s | %dx%d | 25 frames | motion=%d | seed=%d",
+                 image_path.name, width, height, motion_bucket_id, seed)
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        try:
+            result = self.pipe(
+                img,
+                decode_chunk_size=8,
+                generator=generator,
+                motion_bucket_id=motion_bucket_id,
+                noise_aug_strength=0.02,
+                num_frames=frames_out
+            )
+            frames = result.frames[0]
+            
+            export_to_video(frames, str(output_path), fps=fps)
+        except Exception as exc:  # noqa: BLE001
+            return self._fail(self.name, f"SVD pipeline generation failed: {exc}")
+
+        generation_time = time.monotonic() - t_start
+        
+        if not output_path.exists():
+            return self._fail(self.name, "SVD export_to_video did not create the file.")
+
+        log.info("SVD finished in %.1fs → %s", generation_time, output_path.name)
+
+        return GenerationResult(
+            success=True,
+            output_path=str(output_path),
+            model_used=self.name,
+            duration_seconds=frames_out / fps,
+            fps=fps,
+            width=width,
+            height=height,
+            seed=seed,
+            frame_count=frames_out,
+            generation_time_seconds=generation_time,
+        )
 
     def unload(self) -> None:
-        self._clear_gpu_cache()
-        log.debug("SVDAdapter.unload() called (no-op — not loaded).")
+        if self.pipe is not None:
+            del self.pipe
+            self.pipe = None
+            self._clear_gpu_cache()
+            log.debug("SVDAdapter unloaded.")

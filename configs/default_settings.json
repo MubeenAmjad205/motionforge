@@ -1,5 +1,5 @@
 {
-  "default_model": "image_pan_zoom",
+  "default_model": "stable_video_diffusion_xt",
   "fallback_models": [
     "mock_adapter"
   ],
