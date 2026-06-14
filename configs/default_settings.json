@@ -7,8 +7,8 @@
     "width": 854,
     "height": 480
   },
-  "fps": 16,
-  "duration_seconds": 4,
+  "fps": 8,
+  "duration_seconds": 3,
   "seed": 42,
   "motion_effect": "zoom_in",
   "fade_in": 0.3,

@@ -15,8 +15,8 @@
       "width": 854,
       "height": 480
     },
-    "fps": 16,
-    "duration_seconds": 4,
+    "fps": 8,
+    "duration_seconds": 3,
     "seed": 12345,
     "motion_effect": "zoom_in",
     "fade_in": 0.3,
@@ -40,12 +40,12 @@
       "id": 1,
       "name": "awake_at_2am",
       "input_image": "inputs/images/scene_001.png",
-      "duration_seconds": 5,
+      "duration_seconds": 3,
       "resolution": {
         "width": 854,
         "height": 480
       },
-      "fps": 16,
+      "fps": 8,
       "motion_effect": "zoom_in_pan_right",
       "fade_in": 0.5,
       "fade_out": 0.5,
@@ -61,12 +61,12 @@
       "id": 2,
       "name": "getting_up_anyway",
       "input_image": "inputs/images/scene_002.png",
-      "duration_seconds": 4,
+      "duration_seconds": 3,
       "resolution": {
         "width": 854,
         "height": 480
       },
-      "fps": 16,
+      "fps": 8,
       "motion_effect": "zoom_out",
       "fade_in": 0.3,
       "fade_out": 0.3,
@@ -82,12 +82,12 @@
       "id": 3,
       "name": "writing_goals",
       "input_image": "inputs/images/scene_003.png",
-      "duration_seconds": 5,
+      "duration_seconds": 3,
       "resolution": {
         "width": 854,
         "height": 480
       },
-      "fps": 16,
+      "fps": 8,
       "motion_effect": "zoom_in_pan_left",
       "fade_in": 0.3,
       "fade_out": 0.8,
