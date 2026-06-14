@@ -124,6 +124,11 @@ def run_pipeline(
         log.error("No valid scenes found — aborting.")
         sys.exit(1)
 
+    # Convert relative image paths to absolute for the adapters
+    for scene in valid_scenes:
+        if "input_image" in scene:
+            scene["input_image"] = str(PROJECT_ROOT / scene["input_image"])
+
     # Apply adapter override if requested
     if adapter_override:
         if not registry.is_registered(adapter_override):
