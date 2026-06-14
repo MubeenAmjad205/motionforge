@@ -1,0 +1,103 @@
+{
+  "project": {
+    "name": "stickman_motivation_part_1",
+    "version": "1.0.0",
+    "description": "Stickman motivational short-form video scenes for social media",
+    "output_mode": "separate_clips_zip",
+    "aspect_ratio": "16:9"
+  },
+  "global_settings": {
+    "default_model": "image_pan_zoom",
+    "fallback_models": [
+      "mock_adapter"
+    ],
+    "resolution": {
+      "width": 854,
+      "height": 480
+    },
+    "fps": 16,
+    "duration_seconds": 4,
+    "seed": 12345,
+    "motion_effect": "zoom_in",
+    "fade_in": 0.3,
+    "fade_out": 0.3,
+    "motion_strength": 0.55,
+    "guidance_scale": 6.0,
+    "num_inference_steps": 30,
+    "output_format": "mp4",
+    "video_codec": "libx264",
+    "zip_outputs": true
+  },
+  "queue_settings": {
+    "max_retries_per_scene": 2,
+    "retry_failed_scenes": true,
+    "continue_on_error": true,
+    "save_partial_outputs": true,
+    "checkpoint_after_each_scene": true
+  },
+  "scenes": [
+    {
+      "id": 1,
+      "name": "awake_at_2am",
+      "input_image": "inputs/images/scene_001.png",
+      "duration_seconds": 5,
+      "resolution": {
+        "width": 854,
+        "height": 480
+      },
+      "fps": 16,
+      "motion_effect": "zoom_in_pan_right",
+      "fade_in": 0.5,
+      "fade_out": 0.5,
+      "motion_prompt": "Foot tapping rhythmically, head tilting slightly side to side, worried expression, minimal smooth 2D animation, no camera movement.",
+      "negative_prompt": "realistic human, extra limbs, distorted stickman, flickering, morphing body, blurry, text errors",
+      "voiceover": "You are lying awake at 2 AM again. Your brain is replaying everything you did not do today.",
+      "seed": 1001,
+      "model_override": null,
+      "enabled": true,
+      "notes": "Opening scene. Conveys restlessness. Slow zoom-in with slight right pan."
+    },
+    {
+      "id": 2,
+      "name": "getting_up_anyway",
+      "input_image": "inputs/images/scene_002.png",
+      "duration_seconds": 4,
+      "resolution": {
+        "width": 854,
+        "height": 480
+      },
+      "fps": 16,
+      "motion_effect": "zoom_out",
+      "fade_in": 0.3,
+      "fade_out": 0.3,
+      "motion_prompt": "Stickman slowly sits up from bed, stretches arms upward, takes a deep breath. Smooth minimal motion, 2D animation style.",
+      "negative_prompt": "realistic human, extra limbs, distorted body, flickering, morphing, complex background",
+      "voiceover": "But tonight, instead of scrolling, you get up.",
+      "seed": 1002,
+      "model_override": null,
+      "enabled": true,
+      "notes": "Transition scene. Zoom-out effect for sense of perspective shift."
+    },
+    {
+      "id": 3,
+      "name": "writing_goals",
+      "input_image": "inputs/images/scene_003.png",
+      "duration_seconds": 5,
+      "resolution": {
+        "width": 854,
+        "height": 480
+      },
+      "fps": 16,
+      "motion_effect": "zoom_in_pan_left",
+      "fade_in": 0.3,
+      "fade_out": 0.8,
+      "motion_prompt": "Stickman sitting at desk, pen moving across notebook, focused posture, small light bulb glowing above head. Smooth looping animation.",
+      "negative_prompt": "realistic human, extra limbs, distorted body, text errors, flickering, morphing",
+      "voiceover": "You write down three things you will do tomorrow. Just three. That is enough.",
+      "seed": 1003,
+      "model_override": null,
+      "enabled": true,
+      "notes": "Action scene. Slow zoom-in with left pan. Longer fade-out for ending feel."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# MotionForge outputs
+outputs/
+logs/
+zip/
+inputs/
+
+# Exclude sample images generated during tests
+inputs/images/scene_*.png
+
+# Ignore Jupyter checkpoint
+.ipynb_checkpoints/

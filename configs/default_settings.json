@@ -1,0 +1,32 @@
+{
+  "default_model": "image_pan_zoom",
+  "fallback_models": [
+    "mock_adapter"
+  ],
+  "resolution": {
+    "width": 854,
+    "height": 480
+  },
+  "fps": 16,
+  "duration_seconds": 4,
+  "seed": 42,
+  "motion_effect": "zoom_in",
+  "fade_in": 0.3,
+  "fade_out": 0.3,
+  "motion_strength": 0.55,
+  "guidance_scale": 6.0,
+  "num_inference_steps": 30,
+  "output_format": "mp4",
+  "video_codec": "libx264",
+  "zip_outputs": true,
+  "output_dir": "outputs",
+  "logs_dir": "logs",
+  "min_output_file_size_bytes": 10000,
+  "resolution_presets": {
+    "low":            { "width": 640,  "height": 360 },
+    "medium":         { "width": 854,  "height": 480 },
+    "hd":             { "width": 1280, "height": 720 },
+    "vertical_short": { "width": 720,  "height": 1280 },
+    "square":         { "width": 1024, "height": 1024 }
+  }
+}

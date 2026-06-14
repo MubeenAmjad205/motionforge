@@ -1,0 +1,79 @@
+{
+  "image_pan_zoom": {
+    "type": "image_to_video",
+    "adapter": "ImagePanZoomAdapter",
+    "implemented": true,
+    "min_vram_gb": 0,
+    "supports_i2v": true,
+    "supports_negative_prompt": false,
+    "max_width": 1920,
+    "max_height": 1080,
+    "min_frames": 1,
+    "max_frames": 9999,
+    "frame_multiple": 1,
+    "supported_effects": [
+      "zoom_in", "zoom_out",
+      "pan_left", "pan_right", "pan_up", "pan_down",
+      "zoom_in_pan_right", "zoom_in_pan_left",
+      "zoom_out_pan_right", "zoom_out_pan_left",
+      "static"
+    ],
+    "notes": "Real cinematic motion adapter. No GPU needed. Default production fallback."
+  },
+  "mock_adapter": {
+    "type": "image_to_video",
+    "adapter": "MockAdapter",
+    "implemented": true,
+    "min_vram_gb": 0,
+    "supports_i2v": true,
+    "supports_negative_prompt": false,
+    "max_width": 1920,
+    "max_height": 1080,
+    "min_frames": 1,
+    "max_frames": 9999,
+    "frame_multiple": 1,
+    "notes": "DEVELOPMENT ONLY. Brightness-pulse effect. Do not use in production."
+  },
+  "wan2_1_i2v_gguf_q4": {
+    "type": "image_to_video",
+    "adapter": "WanAdapter",
+    "implemented": false,
+    "min_vram_gb": 12,
+    "supports_i2v": true,
+    "supports_negative_prompt": true,
+    "max_width": 1280,
+    "max_height": 720,
+    "min_frames": 16,
+    "max_frames": 81,
+    "frame_multiple": 1,
+    "notes": "NOT IMPLEMENTED. Wan2.1 I2V GGUF Q4. Phase 2 target."
+  },
+  "stable_video_diffusion_xt": {
+    "type": "image_to_video",
+    "adapter": "SVDAdapter",
+    "implemented": false,
+    "min_vram_gb": 8,
+    "supports_i2v": true,
+    "supports_negative_prompt": false,
+    "max_width": 1024,
+    "max_height": 576,
+    "min_frames": 14,
+    "max_frames": 25,
+    "frame_multiple": 1,
+    "notes": "NOT IMPLEMENTED. Stable Video Diffusion XT. Phase 2 fallback."
+  },
+  "framepack_low_vram": {
+    "type": "image_to_video",
+    "adapter": "FramePackAdapter",
+    "implemented": false,
+    "min_vram_gb": 6,
+    "supports_i2v": true,
+    "supports_negative_prompt": true,
+    "max_width": 854,
+    "max_height": 480,
+    "min_frames": 8,
+    "max_frames": 64,
+    "frame_multiple": 8,
+    "notes": "NOT IMPLEMENTED. FramePack low-VRAM. Phase 2 emergency fallback."
+  }
+}

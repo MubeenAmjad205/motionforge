@@ -1,0 +1,14 @@
+moviepy==1.0.3
+Pillow>=10.0.0
+numpy>=1.24.0
+imageio>=2.31.0
+imageio-ffmpeg>=0.4.9
+
+# ── Optional: install for real model backends (Phase 2) ──────────────────── #
+# torch>=2.1.0
+# torchvision>=0.16.0
+# diffusers>=0.27.0
+# transformers>=4.38.0
+# accelerate>=0.27.0
+# safetensors>=0.4.0
+# huggingface_hub>=0.21.0
