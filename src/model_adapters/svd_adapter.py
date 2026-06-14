@@ -46,8 +46,16 @@ class SVDAdapter(BaseAdapter):
             torch_dtype=torch.float16,
             variant="fp16"
         )
+        
+        # Aggressive VRAM optimizations for 16GB GPUs (Colab T4)
         self.pipe.enable_model_cpu_offload()
-        log.info("SVD XT loaded and offloaded to CPU.")
+        self.pipe.enable_attention_slicing()
+        
+        if hasattr(self.pipe, "vae") and self.pipe.vae is not None:
+            self.pipe.vae.enable_slicing()
+            self.pipe.vae.enable_tiling()
+            
+        log.info("SVD XT loaded with max VRAM optimizations (offload, attention slicing, vae slicing/tiling).")
 
     def generate(self, scene: dict[str, Any], output_path: Path) -> GenerationResult:
         if self.pipe is None:
@@ -113,9 +121,17 @@ class SVDAdapter(BaseAdapter):
             
             export_to_video(frames, str(output_path), fps=fps)
         except Exception as exc:  # noqa: BLE001
+            import gc
+            gc.collect()
+            torch.cuda.empty_cache()
             return self._fail(self.name, f"SVD pipeline generation failed: {exc}")
 
         generation_time = time.monotonic() - t_start
+        
+        # Cleanup aggressively after each generation
+        import gc
+        gc.collect()
+        torch.cuda.empty_cache()
         
         if not output_path.exists():
             return self._fail(self.name, "SVD export_to_video did not create the file.")
