@@ -22,6 +22,7 @@ Queue state is saved after every scene for Colab reconnect resilience.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 from datetime import datetime, timezone
@@ -85,10 +86,12 @@ class QueueManager:
         for scene in scenes:
             sid_str = _scene_id_str(scene)
             output_filename = f"scene_{sid_str}.mp4"
+            scene_hash = self._compute_scene_hash(scene)
 
             self._queue.append({
                 "scene_id": scene.get("id"),
                 "scene_name": scene.get("name"),
+                "scene_hash": scene_hash,
                 "status": STATUS_PENDING,
                 "attempts": 0,
                 "selected_model": scene.get("_resolved_model", "image_pan_zoom"),
@@ -133,12 +136,32 @@ class QueueManager:
             sid = saved_item.get("scene_id")
             if sid in by_id:
                 item = by_id[sid]
-                item["status"] = saved_item.get("status", STATUS_PENDING)
-                item["attempts"] = saved_item.get("attempts", 0)
-                item["output_path"] = saved_item.get("output_path", item["output_path"])
-                item["model_used"] = saved_item.get("model_used")
-                item["error"] = saved_item.get("error")
-                item["generation_time_seconds"] = saved_item.get("generation_time_seconds", 0.0)
+                
+                # Smart Caching: Only restore SUCCESS state if the scene hash matches
+                saved_hash = saved_item.get("scene_hash")
+                saved_status = saved_item.get("status", STATUS_PENDING)
+                
+                if saved_hash == item["scene_hash"] and saved_status == STATUS_SUCCESS:
+                    # Hash matches and it was a success. Restore fully.
+                    item["status"] = saved_status
+                    item["attempts"] = saved_item.get("attempts", 0)
+                    item["output_path"] = saved_item.get("output_path", item["output_path"])
+                    item["model_used"] = saved_item.get("model_used")
+                    item["error"] = saved_item.get("error")
+                    item["generation_time_seconds"] = saved_item.get("generation_time_seconds", 0.0)
+                    item["duration_seconds"] = saved_item.get("duration_seconds")
+                    item["fps"] = saved_item.get("fps")
+                    item["width"] = saved_item.get("width")
+                    item["height"] = saved_item.get("height")
+                    item["seed"] = saved_item.get("seed")
+                    item["frame_count"] = saved_item.get("frame_count")
+                    item["file_size_bytes"] = saved_item.get("file_size_bytes")
+                elif saved_hash != item["scene_hash"] and saved_status == STATUS_SUCCESS:
+                    # Hash changed! Force a regeneration by leaving it as PENDING.
+                    log.info("Scene '%s' config or image modified. Forcing regeneration.", item["scene_name"])
+                else:
+                    # It wasn't a success before anyway, leave it pending.
+                    pass
 
         resumed = sum(1 for i in self._queue if i["status"] == STATUS_SUCCESS)
         log.info("Checkpoint loaded — %d scene(s) already completed.", resumed)
@@ -285,6 +308,21 @@ class QueueManager:
             f.write(f"Error: {item.get('error', 'unknown')}\n")
             f.write(f"Start: {item.get('start_time')}\n")
             f.write(f"End: {item.get('end_time')}\n")
+
+    def _compute_scene_hash(self, scene: dict[str, Any]) -> str:
+        """Compute MD5 hash of scene dict and input image metadata for smart caching."""
+        clean_scene = {k: v for k, v in scene.items() if not k.startswith("_")}
+        scene_str = json.dumps(clean_scene, sort_keys=True)
+        hasher = hashlib.md5(scene_str.encode("utf-8"))
+        
+        image_rel = scene.get("input_image", "")
+        if image_rel:
+            image_path = self._project_root / image_rel
+            if image_path.exists():
+                stat = image_path.stat()
+                hasher.update(f"{stat.st_size}_{stat.st_mtime}".encode("utf-8"))
+        
+        return hasher.hexdigest()
 
     @staticmethod
     def _build_scene_result(item: dict[str, Any]) -> SceneResult:
