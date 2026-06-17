@@ -92,8 +92,13 @@ class SVDAdapter(BaseAdapter):
         fps = int(scene.get("fps", 16))
         seed = scene.get("seed")
         
-        # In SVD, motion_bucket_id acts as motion_strength (1-255). Default 127.
-        motion_bucket_id = int(scene.get("motion_bucket_id", 127))
+        # Map generic motion_strength (0.0-1.0) to SVD's motion_bucket_id (1-255)
+        motion_bucket_id = scene.get("motion_bucket_id")
+        if motion_bucket_id is None:
+            strength = float(scene.get("motion_strength", 0.5))
+            motion_bucket_id = max(1, min(255, int(strength * 255)))
+        else:
+            motion_bucket_id = int(motion_bucket_id)
         # SVD XT generates exactly 25 frames
         frames_out = 25 
         
