@@ -8,9 +8,7 @@
   },
   "global_settings": {
     "default_model": "stable_video_diffusion_xt",
-    "fallback_models": [
-      "mock_adapter"
-    ],
+    "fallback_models": [],
     "resolution": {
       "width": 854,
       "height": 480
