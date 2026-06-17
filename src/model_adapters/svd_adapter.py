@@ -52,10 +52,9 @@ class SVDAdapter(BaseAdapter):
         self.pipe.enable_attention_slicing()
         
         if hasattr(self.pipe, "vae") and self.pipe.vae is not None:
-            self.pipe.vae.enable_slicing()
             self.pipe.vae.enable_tiling()
             
-        log.info("SVD XT loaded with max VRAM optimizations (offload, attention slicing, vae slicing/tiling).")
+        log.info("SVD XT loaded with max VRAM optimizations (offload, attention slicing, vae tiling).")
 
     def generate(self, scene: dict[str, Any], output_path: Path) -> GenerationResult:
         if self.pipe is None:
