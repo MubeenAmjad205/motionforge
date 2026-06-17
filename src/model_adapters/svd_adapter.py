@@ -50,11 +50,8 @@ class SVDAdapter(BaseAdapter):
         # Aggressive VRAM optimizations for 16GB GPUs (Colab T4)
         self.pipe.enable_model_cpu_offload()
         self.pipe.enable_attention_slicing()
-        
-        if hasattr(self.pipe, "vae") and self.pipe.vae is not None:
-            self.pipe.vae.enable_tiling()
             
-        log.info("SVD XT loaded with max VRAM optimizations (offload, attention slicing, vae tiling).")
+        log.info("SVD XT loaded with max VRAM optimizations (offload, attention slicing).")
 
     def generate(self, scene: dict[str, Any], output_path: Path) -> GenerationResult:
         if self.pipe is None:
