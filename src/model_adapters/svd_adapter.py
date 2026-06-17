@@ -46,12 +46,12 @@ class SVDAdapter(BaseAdapter):
             torch_dtype=torch.float16,
             variant="fp16"
         )
-        
-        # Aggressive VRAM optimizations for 16GB GPUs (Colab T4)
-        self.pipe.enable_model_cpu_offload()
+        # Instead of CPU offload (which exhausts Colab's 12.6GB System RAM and crashes the kernel),
+        # we move the 9GB model fully into the T4 GPU's 15GB VRAM.
+        self.pipe = self.pipe.to("cuda")
         self.pipe.enable_attention_slicing()
             
-        log.info("SVD XT loaded with max VRAM optimizations (offload, attention slicing).")
+        log.info("SVD XT loaded (Model on GPU, attention slicing enabled).")
 
     def generate(self, scene: dict[str, Any], output_path: Path) -> GenerationResult:
         if self.pipe is None:
