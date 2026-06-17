@@ -107,7 +107,7 @@ class FallbackManager:
                 except NotImplementedError as exc:
                     last_error = str(exc)
                     scene_logger.warning(
-                        "Model '%s' not implemented — skipping to next fallback.", model_name
+                        "Model '%s' raised NotImplementedError (skipping): %s", model_name, last_error
                     )
                     try:
                         adapter.unload()
